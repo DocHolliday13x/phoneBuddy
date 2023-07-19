@@ -1,17 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 
 
-const journalEntries = [
-  // You can replace this with your actual journal entry data fetched from state management
-  { id: '1', title: 'Entry 1', date: '2023-07-19' },
-  { id: '2', title: 'Entry 2', date: '2023-07-18' },
-  { id: '3', title: 'Entry 3', date: '2023-07-17' },
-  // Add more entries as needed
-];
-
-
 const HomeScreen = ({ navigation }) => {
+  const [journalEntries, setJournalEntries] = useState([
+    { id: '1', title: 'Entry 1', date: '2023-07-19' },
+    { id: '2', title: 'Entry 2', date: '2023-07-18' },
+    { id: '3', title: 'Entry 3', date: '2023-07-17' },
+    // Add more entries as needed
+  ]);
+
+
   const renderJournalEntry = ({ item }) => {
     return (
       <TouchableOpacity
