@@ -1,64 +1,92 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import * as Device from 'expo-device'; // Import the Device module
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
-import { AppContext } from '../contexts/AppContext'; // Import the AppContext
+import { Audio } from 'expo-av';
 
 
 const CameraScreen = () => {
-  const [hasCameraPermission, setHasCameraPermission] = useState(null);
-  const [hasAudioPermission, setHasAudioPermission] = useState(null);
-  const [cameraRef, setCameraRef] = useState(null);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
 
   useEffect(() => {
-    getCameraPermissions();
-    getAudioPermissions();
+    (async () => {
+      const { status } = await Camera.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
   }, []);
 
-  const getCameraPermissions = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    setHasCameraPermission(status === 'granted');
+  const handleCameraType = () => {
+    setType(
+      type === Camera.Constants.Type.back
+        ? Camera.Constants.Type.front
+        : Camera.Constants.Type.back
+    );
   };
 
-  const getAudioPermissions = async () => {
-    const { status } = await Audio.requestMicrophonePermissionsAsync();
-    setHasAudioPermission(status === 'granted');
-  };
-
-  const handleTakePicture = async () => {
-    if (cameraRef) {
-      try {
-        const photo = await cameraRef.takePictureAsync();
-        console.log('Photo taken:', photo.uri);
-      } catch (error) {
-        console.log('Error taking photo:', error.message);
-      }
+  const handleTakePhoto = async () => {
+    if (cameraRef.current) {
+      let photo = await cameraRef.current.takePictureAsync();
+      console.log(photo);
     }
   };
 
-  if (hasCameraPermission === null || hasAudioPermission === null) {
+  const cameraRef = React.useRef(null);
+
+  if (hasPermission === null) {
     return <View />;
   }
-  if (hasCameraPermission === false || hasAudioPermission === false) {
-    return <Text>Camera and audio permissions are required to use this feature.</Text>;
+
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
   }
 
+
   return (
-    <View style={{ flex: 1 }}>
-      <Camera
-        ref={(ref) => setCameraRef(ref)}
-        style={{ flex: 1 }}
-        type={Camera.Constants.Type.back}
-      />
-      <View style={{ flex: 0.1, alignItems: 'center' }}>
-        <TouchableOpacity onPress={handleTakePicture} style={{ backgroundColor: 'blue', padding: 15 }}>
-          <Text style={{ color: 'white', fontSize: 18 }}>Take Photo</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <Camera style={styles.camera} type={type} ref={cameraRef}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
+            <Text style={styles.buttonText}>Take Photo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleCameraType}
+          >
+            <Text style={styles.buttonText}>Flip</Text>
+          </TouchableOpacity>
+        </View>
+      </Camera>
     </View>
   );
 };
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  camera: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  button: {
+    margin: 10,
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#2196F3',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+});
 
 
 export default CameraScreen;
