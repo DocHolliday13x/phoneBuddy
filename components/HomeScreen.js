@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { AppContext } from '../contexts/AppContext';
 
 
 const HomeScreen = ({ navigation }) => {
