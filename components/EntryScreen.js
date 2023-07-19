@@ -4,12 +4,11 @@ import { AppContext } from '../contexts/AppContext';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import the MaterialCommunityIcons
 
-const EntryScreen = () => {
-  const route = useRoute();
+const EntryScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { savedImageUri, entry } = route.params;
-  const [editedTitle, setEditedTitle] = useState(entry.title);
-  const { darkMode } = useContext(AppContext); // Get the darkMode state from the AppContext
+  const { savedImageUri, entry } = route.params || { entry: { title: '', date: '', location: '', imageUri: '' } };
+  const [editedTitle, setEditedTitle] = useState(entry?.title || '');
+  const { darkMode, setJournalEntries } = useContext(AppContext); // Add setJournalEntries to update journalEntries
 
   const handleTitleChange = (text) => {
     setEditedTitle(text);
@@ -22,21 +21,34 @@ const EntryScreen = () => {
   }, [savedImageUri]);
 
   const handleSave = () => {
-    entry.title = editedTitle;
+    // Create a copy of the original entry with the updated title
+    const updatedEntry = { ...entry, title: editedTitle };
+
+    // Find the index of the original entry in the journalEntries array
+    const entryIndex = journalEntries.findIndex((item) => item.id === entry.id);
+
+    // Create a copy of the journalEntries array and replace the old entry with the updated one
+    const updatedEntries = [...journalEntries];
+    updatedEntries[entryIndex] = updatedEntry;
+
+    // Update the journalEntries state with the updated array
+    setJournalEntries(updatedEntries);
+
+    // Navigate back to the HomeScreen
     navigation.goBack();
   };
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: darkMode ? '#1c1c1c' : 'white' }]}>
-      <Image source={{ uri: entry.imageUri }} style={styles.image} />
+      <Image source={{ uri: entry?.imageUri || '' }} style={styles.image} />
       <TextInput
         value={editedTitle}
         onChangeText={handleTitleChange}
         placeholder="Entry Title"
         style={[styles.titleInput, { borderColor: darkMode ? '#ccc' : 'black' }]}
       />
-      <Text style={[styles.dateText, { color: darkMode ? '#666' : 'black' }]}>{entry.date}</Text>
-      <Text style={[styles.locationText, { color: darkMode ? '#666' : 'black' }]}>{entry.location}</Text>
+      <Text style={[styles.dateText, { color: darkMode ? '#666' : 'black' }]}>{entry?.date || ''}</Text>
+      <Text style={[styles.locationText, { color: darkMode ? '#666' : 'black' }]}>{entry?.location || ''}</Text>
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={[styles.saveButtonText, { color: darkMode ? 'black' : 'white' }]}>Save</Text>
       </TouchableOpacity>
@@ -102,15 +114,17 @@ export default EntryScreen;
 
 // import React, { useState, useEffect, useContext } from 'react';
 // import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-// import { useRoute, useNavigation } from '@react-navigation/native';
 // import { AppContext } from '../contexts/AppContext';
+// import { useRoute, useNavigation } from '@react-navigation/native';
+// import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import the MaterialCommunityIcons
 
-
-// const EntryScreen = () => {
-//   const route = useRoute();
+// const EntryScreen = ({ route }) => {
 //   const navigation = useNavigation();
-//   const { savedImageUri, entry } = route.params;
-//   const [editedTitle, setEditedTitle] = useState(entry.title);
+//   const { savedImageUri, entry } = route.params || {
+//     entry: { title: '', date: '', location: '', imageUri: '' },
+//   };
+//   const [editedTitle, setEditedTitle] = useState(entry.title || '');
+//   const { darkMode } = useContext(AppContext);
 
 //   const handleTitleChange = (text) => {
 //     setEditedTitle(text);
@@ -123,29 +137,36 @@ export default EntryScreen;
 //   }, [savedImageUri]);
 
 //   const handleSave = () => {
-//     entry.title = editedTitle;
+//     const updatedEntry = { ...entry, title: editedTitle };
 //     navigation.goBack();
 //   };
 
-
 //   return (
-//     <ScrollView contentContainerStyle={styles.container}>
-//       <Image source={{ uri: entry.imageUri }} style={styles.image} />
+//     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: darkMode ? '#1c1c1c' : 'white' }]}>
+//       <Image source={{ uri: entry?.imageUri || '' }} style={styles.image} />
 //       <TextInput
 //         value={editedTitle}
 //         onChangeText={handleTitleChange}
 //         placeholder="Entry Title"
-//         style={styles.titleInput}
+//         style={[styles.titleInput, { borderColor: darkMode ? '#ccc' : 'black' }]}
 //       />
-//       <Text style={styles.dateText}>{entry.date}</Text>
-//       <Text style={styles.locationText}>{entry.location}</Text>
+//       <Text style={[styles.dateText, { color: darkMode ? '#666' : 'black' }]}>{entry?.date || ''}</Text>
+//       <Text style={[styles.locationText, { color: darkMode ? '#666' : 'black' }]}>{entry?.location || ''}</Text>
 //       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-//         <Text style={styles.saveButtonText}>Save</Text>
+//         <Text style={[styles.saveButtonText, { color: darkMode ? 'black' : 'white' }]}>Save</Text>
 //       </TouchableOpacity>
 //     </ScrollView>
 //   );
 // };
 
+// EntryScreen.navigationOptions = ({ navigation }) => ({
+//   title: 'Entry Details',
+//   headerRight: () => (
+//     <TouchableOpacity style={{ marginRight: 15 }} onPress={() => navigation.navigate('CameraScreen')}>
+//       <MaterialCommunityIcons name="theme-light-dark" size={24} color="black" />
+//     </TouchableOpacity>
+//   ),
+// });
 
 // const styles = StyleSheet.create({
 //   container: {
@@ -191,8 +212,10 @@ export default EntryScreen;
 //   },
 // });
 
-
 // export default EntryScreen;
+
+
+
 
 
 
