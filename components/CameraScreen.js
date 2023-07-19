@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 
 
-const CameraScreen = () => {
+const CameraScreen = ({ navigation }) => {
   const [hasPermission, setHasPermission] = React.useState(null);
   const [type, setType] = React.useState(Camera.Constants.Type.back);
 
@@ -49,6 +49,8 @@ const CameraScreen = () => {
       }
 
       alert('Photo saved to media library!');
+      // Navigate to the Journal screen and pass the saved image URI
+      navigation.navigate('Journal', { savedImageUri: asset.uri });
     } catch (error) {
       console.log(error);
       alert('Failed to save photo to media library.');
@@ -85,6 +87,7 @@ const CameraScreen = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -113,9 +116,6 @@ const styles = StyleSheet.create({
 
 
 export default CameraScreen;
-
-
-
 
 
 

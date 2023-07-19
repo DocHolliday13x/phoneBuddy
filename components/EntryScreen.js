@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppContext } from '../contexts/AppContext';
-import * as Location from 'expo-location';
-import { format } from 'date-fns';
 
 
 const EntryScreen = () => {
@@ -23,6 +21,7 @@ const EntryScreen = () => {
     entry.title = editedTitle;
     navigation.navigate('HomeScreen');
   };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -89,10 +88,6 @@ const styles = StyleSheet.create({
 
 
 export default EntryScreen;
-
-
-
-
 
 
 
