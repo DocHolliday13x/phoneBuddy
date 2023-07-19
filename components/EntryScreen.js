@@ -1,54 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { AppContext } from '../contexts/AppContext';
 import * as Location from 'expo-location';
+import { format } from 'date-fns';
 
 
-const EntryScreen = ({ route, navigation }) => {
-  const { entryId } = route.params;
-  const [entry, setEntry] = useState({
-    id: entryId,
-    title: 'Entry 1', // Replace with actual title fetched from state management
-    date: '2023-07-19', // Replace with actual date fetched from state management
-    imageUri: null, // Replace with actual image URI fetched from state management
-    location: null, // Replace with actual location fetched from state management
-  });
+const EntryScreen = () => {
+  const { journalEntries } = useContext(AppContext);
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { entry } = route.params;
+  const [editedTitle, setEditedTitle] = useState(entry.title);
 
-  useEffect(() => {
-    // You can implement logic here to fetch the entry details based on the entryId
-    // and update the 'entry' state with the actual data.
-    // For this example, we'll use static data.
-    // Replace the static data below with the actual data you fetch from state management.
-    const fetchEntryDetails = async () => {
-      // Simulating fetching data with a delay (replace this with actual fetching logic)
-      const fetchedEntry = await fetchDataFromStateManagement(entryId);
-      setEntry(fetchedEntry);
-    };
-
-    fetchEntryDetails();
-  }, [entryId]);
-
-  const handleTitleChange = (newTitle) => {
-    setEntry({ ...entry, title: newTitle });
+  const handleTitleChange = (text) => {
+    setEditedTitle(text);
   };
 
   const handleSave = () => {
-    // Implement logic to save the updated entry details to state management
-    // After saving, navigate back to HomeScreen
+    // Logic to save the updated entry title in your state management or data storage
+    // For now, we'll just update the entry object and navigate back to the HomeScreen.
+    entry.title = editedTitle;
     navigation.navigate('HomeScreen');
   };
 
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {entry.imageUri && <Image source={{ uri: entry.imageUri }} style={styles.image} />}
+      <Image source={{ uri: entry.imageUri }} style={styles.image} />
       <TextInput
-        value={entry.title}
+        value={editedTitle}
         onChangeText={handleTitleChange}
         placeholder="Entry Title"
         style={styles.titleInput}
       />
       <Text style={styles.dateText}>{entry.date}</Text>
-      <Text style={styles.locationText}>{entry.location ? entry.location : 'Location not available'}</Text>
+      <Text style={styles.locationText}>{entry.location}</Text>
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Save</Text>
       </TouchableOpacity>

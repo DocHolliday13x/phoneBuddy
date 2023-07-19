@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 
 
 const HomeScreen = ({ navigation }) => {
-  const [journalEntries, setJournalEntries] = useState([
-    { id: '1', title: 'Entry 1', date: '2023-07-19' },
-    { id: '2', title: 'Entry 2', date: '2023-07-18' },
-    { id: '3', title: 'Entry 3', date: '2023-07-17' },
+  const { journalEntries } = useContext(AppContext); // Get the journalEntries array from the AppContext
+    // { id: '1', title: 'Entry 1', date: '2023-07-19' },
+    // { id: '2', title: 'Entry 2', date: '2023-07-18' },
+    // { id: '3', title: 'Entry 3', date: '2023-07-17' },
     // Add more entries as needed
-  ]);
+  // ]);
 
 
   const renderJournalEntry = ({ item }) => {
@@ -22,7 +22,7 @@ const HomeScreen = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
-  
+
 
   return (
     <View style={styles.container}>
