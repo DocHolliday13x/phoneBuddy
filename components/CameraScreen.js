@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as Location from 'expo-location';
+import { format } from 'date-fns'; // We'll use this to format the date
 
 
 const CameraScreen = ({ navigation }) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -23,6 +25,20 @@ const CameraScreen = ({ navigation }) => {
     })();
   }, []);
 
+  useEffect(() => {
+    // Fetch the current location when the component mounts
+    fetchLocation();
+  }, []);
+
+  const fetchLocation = async () => {
+    try {
+      const { coords } = await Location.getCurrentPositionAsync({});
+      setLocation(coords);
+    } catch (error) {
+      console.log('Error fetching location: ', error);
+    }
+  };
+
   const takePicture = async () => {
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
@@ -32,11 +48,19 @@ const CameraScreen = ({ navigation }) => {
 
   const saveEntry = () => {
     if (capturedImage) {
-      // Here, you can implement logic to save the captured image as a new journal entry
-      // along with date and location information.
-      // After saving, navigate back to the HomeScreen.
-      // For simplicity, we'll just navigate back to HomeScreen without saving the image.
-      navigation.navigate('HomeScreen');
+      // Create a new journal entry object with image URI, date, and location
+      const newEntry = {
+        id: Date.now().toString(), // A unique ID for the entry
+        imageUri: capturedImage.uri,
+        date: format(new Date(), 'yyyy-MM-dd'), // Format the date as 'YYYY-MM-DD'
+        location: location
+          ? `Lat: ${location.latitude.toFixed(6)}, Long: ${location.longitude.toFixed(6)}`
+          : 'Location not available',
+      };
+
+      // Logic to save the new journal entry in your state management or any data storage
+      // For now, we'll just navigate to the EntryScreen without saving the entry.
+      navigation.navigate('EntryScreen', { entry: newEntry });
     }
   };
 
@@ -51,10 +75,16 @@ const CameraScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} ref={(ref) => setCameraRef(ref)} type={Camera.Constants.Type.back} />
-      <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-        <Text style={styles.captureButtonText}>Capture</Text>
-      </TouchableOpacity>
+      {capturedImage ? (
+        <Image source={{ uri: capturedImage.uri }} style={styles.capturedImage} />
+      ) : (
+        <Camera style={styles.camera} ref={(ref) => setCameraRef(ref)} type={Camera.Constants.Type.back} />
+      )}
+      {!capturedImage && (
+        <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+          <Text style={styles.captureButtonText}>Capture</Text>
+        </TouchableOpacity>
+      )}
       {capturedImage && (
         <TouchableOpacity style={styles.saveButton} onPress={saveEntry}>
           <Text style={styles.saveButtonText}>Save Entry</Text>
@@ -71,6 +101,10 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  capturedImage: {
+    flex: 1,
+    resizeMode: 'cover',
   },
   captureButton: {
     position: 'absolute',
@@ -104,7 +138,6 @@ const styles = StyleSheet.create({
 
 
 export default CameraScreen;
-
 
 
 
