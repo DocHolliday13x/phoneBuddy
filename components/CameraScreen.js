@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import { Audio } from 'expo-av';
+import * as MediaLibrary from 'expo-media-library';
 
 
 const CameraScreen = () => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [hasPermission, setHasPermission] = React.useState(null);
+  const [type, setType] = React.useState(Camera.Constants.Type.back);
 
-  useEffect(() => {
+  React.useEffect(() => {
     (async () => {
       const { status } = await Camera.requestPermissionsAsync();
       setHasPermission(status === 'granted');
@@ -27,7 +27,31 @@ const CameraScreen = () => {
   const handleTakePhoto = async () => {
     if (cameraRef.current) {
       let photo = await cameraRef.current.takePictureAsync();
-      console.log(photo);
+      savePhoto(photo);
+    }
+  };
+
+  const savePhoto = async (photo) => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+
+      if (status !== 'granted') {
+        throw new Error('Permission not granted to access media library');
+      }
+
+      const asset = await MediaLibrary.createAssetAsync(photo.uri);
+      const album = await MediaLibrary.getAlbumAsync('ExpoCameraApp');
+
+      if (album == null) {
+        await MediaLibrary.createAlbumAsync('ExpoCameraApp', asset, false);
+      } else {
+        await MediaLibrary.addAssetsToAlbumAsync([asset], album.id, false);
+      }
+
+      alert('Photo saved to media library!');
+    } catch (error) {
+      console.log(error);
+      alert('Failed to save photo to media library.');
     }
   };
 
@@ -61,7 +85,6 @@ const CameraScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -90,6 +113,7 @@ const styles = StyleSheet.create({
 
 
 export default CameraScreen;
+
 
 
 
