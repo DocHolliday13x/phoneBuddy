@@ -5,10 +5,12 @@ const AppContext = createContext();
 
 
 const AppProvider = ({ children }) => {
+
   const [journalEntries, setJournalEntries] = useState([]);
+  const [darkMode, setDarkMode] = useState(false); // Add darkMode state
 
   return (
-    <AppContext.Provider value={{ journalEntries, setJournalEntries }}>
+    <AppContext.Provider value={{ journalEntries, setJournalEntries, darkMode, setDarkMode }}>
       {children}
     </AppContext.Provider>
   );
