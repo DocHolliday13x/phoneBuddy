@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
 import { Camera } from 'expo-camera';
-import { Device } from 'expo-device';
+import * as ImagePicker from 'expo-image-picker';
+import * as Device from 'expo-device'; // Import the Device module
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { View, TouchableOpacity, Text } from 'react-native';
+import { AppContext } from '../contexts/AppContext'; // Import the AppContext
+
 
 const CameraScreen = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
